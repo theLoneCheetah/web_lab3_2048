@@ -141,6 +141,11 @@ button:hover {
     animation: remove 0.15s ease-in-out forwards;
 }
 
+/* Отключение плавного перехода при изменении размера окна */
+.tiles-container.no-transition .tile {
+    transition: none !important;
+}
+
 @keyframes appear {
     0% { opacity: 0; transform: scale(0); }
     100% { opacity: 1; transform: scale(1); }

@@ -637,3 +637,19 @@ window.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('resize', () => {
     syncBoard(gridData);
 });
+
+// Обработчик изменения размера окна с отключением анимации
+let resizeTimer;
+window.addEventListener('resize', () => {
+    // Отключение transition и сброс таймера
+    tilesContainer.classList.add('no-transition');
+    clearTimeout(resizeTimer);
+    
+    // Мгновенный пересчёт позиций плиток
+    syncBoard(gridData);
+    
+    // После окончания ресайза (150 мс без событий) возврат transition
+    resizeTimer = setTimeout(() => {
+        tilesContainer.classList.remove('no-transition');
+    }, 150);
+});
