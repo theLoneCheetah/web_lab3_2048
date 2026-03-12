@@ -12,6 +12,21 @@ const scoreSpan = document.getElementById('score');
 const newGameBtn = document.getElementById('new-game');
 const undoBtn = document.getElementById('undo');
 
+// DOM для модальных окон
+const gameOverModal = document.getElementById('game-over-modal');
+const gameOverMessage = document.getElementById('game-over-message');
+const playerNameInput = document.getElementById('player-name');
+const saveScoreBtn = document.getElementById('save-score-btn');
+const restartFromModalBtn = document.getElementById('restart-from-modal');
+const saveConfirmation = document.getElementById('save-confirmation');
+const showLeaderboardBtn = document.getElementById('show-leaderboard');
+const leaderboardModal = document.getElementById('leaderboard-modal');
+const leaderboardBody = document.getElementById('leaderboard-body');
+const closeLeaderboardBtn = document.getElementById('close-leaderboard');
+
+// Массив лидеров
+let leaders = [];
+
 // Переменная для активации/деактивации управления, по умолчанию активна
 let isGameActive = true;
 
@@ -199,6 +214,7 @@ function undo() {
     updateScore();
     renderBoard();
     saveGameToLocalStorage();
+    checkGameOverAndShowModal(); // проверка окончания игры
 }
 
 // Сохранение текущего состояния игры в localStorage
@@ -228,7 +244,10 @@ function loadGameFromLocalStorage() {
     } else {
         initGame(); // если пусто, начать новую игру
     }
+
+    // Обновление и проверка окончания игры
     renderBoard();
+    checkGameOverAndShowModal();
 }
 
 // Основная функция движения
@@ -288,6 +307,7 @@ function move(direction) {
         // Обновление и сохранение
         renderBoard();
         saveGameToLocalStorage();
+        checkGameOverAndShowModal(); // проверка окончания игры
     } else {
         // Если поле не изменилось, ничего не делать
         console.log('Невозможный ход');
@@ -368,6 +388,156 @@ function initControls() {
     }, { passive: true });
 }
 
+// Загрузка лидеров из local storage
+function loadLeaders() {
+    const stored = localStorage.getItem('leaderboard2048');
+    leaders = stored ? JSON.parse(stored) : [];
+}
+
+// Сохранение 10 лидеров в local storage
+function saveLeaders() {
+    leaders.sort((a, b) => b.score - a.score);
+    leaders = leaders.slice(0, 10);
+    localStorage.setItem('leaderboard2048', JSON.stringify(leaders));
+}
+
+// Запись в массив лидеров
+function addLeader(name, score) {
+    const date = new Date().toLocaleDateString('ru-RU');
+    leaders.push({ name, score, date });
+    saveLeaders(); // сохранить
+}
+
+// Рендеринг таблицы лидеров
+function renderLeaderboard() {
+    // Очистка
+    while (leaderboardBody.firstChild) {
+        leaderboardBody.removeChild(leaderboardBody.firstChild);
+    }
+    
+    leaders.forEach(entry => {
+        // Построчно
+        const row = document.createElement('tr');
+        
+        const nameCell = document.createElement('td'); // имя
+        nameCell.textContent = entry.name;
+        row.appendChild(nameCell);
+        
+        const scoreCell = document.createElement('td'); // счёт
+        scoreCell.textContent = entry.score;
+        row.appendChild(scoreCell);
+        
+        const dateCell = document.createElement('td'); // дата
+        dateCell.textContent = entry.date;
+        row.appendChild(dateCell);
+        
+        leaderboardBody.appendChild(row);
+    });
+}
+
+// Проверка окончания игры
+function isGameOver() {
+    // Есть пустые клетки?
+    for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+            if (gridData[row][col] === 0) return false;
+        }
+    }
+
+    // Горизонтальные слияния?
+    for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE - 1; col++) {
+            if (gridData[row][col] === gridData[row][col + 1]) return false;
+        }
+    }
+
+    // Вертикальные слияния?
+    for (let col = 0; col < SIZE; col++) {
+        for (let row = 0; row < SIZE - 1; row++) {
+            if (gridData[row][col] === gridData[row + 1][col]) return false;
+        }
+    }
+
+    return true; // если ничего нет, то игра окончена
+}
+
+// Модальное окно окончания игры
+function showGameOverModal() {
+    gameOverModal.classList.remove('hidden');
+    playerNameInput.value = '';
+    playerNameInput.classList.remove('hidden');
+    saveScoreBtn.classList.remove('hidden');
+    restartFromModalBtn.classList.remove('hidden');
+    saveConfirmation.classList.add('hidden');
+    gameOverMessage.textContent = 'Игра окончена! Введите имя для сохранения рекорда:';
+}
+
+// Скрытие окна окончания игры
+function hideGameOverModal() {
+    gameOverModal.classList.add('hidden');
+}
+
+// Проверка окончания игры, показ/скрытие модального окна
+function checkGameOverAndShowModal() {
+    if (isGameOver()) {
+        setGameActive(false);
+        showGameOverModal();
+    } else {
+        setGameActive(true);
+        hideGameOverModal();
+    }
+}
+
+// Обработчик кнопки сохранения результата
+saveScoreBtn.addEventListener('click', () => {
+    const name = playerNameInput.value.trim();
+    if (!name) { // требуется ввести имя
+        alert('Введите имя');
+        return;
+    }
+
+    // Сохранение в таблицу лидеров и её отображение
+    addLeader(name, score);
+    renderLeaderboard();
+
+    // Изменение интерфейса, сообщение о сохранении
+    gameOverMessage.textContent = 'Ваш рекорд сохранён!';
+    playerNameInput.classList.add('hidden');
+    saveScoreBtn.classList.add('hidden');
+    saveConfirmation.classList.remove('hidden');
+});
+
+// Обработчик кнопки начала новой игры из модального окна
+restartFromModalBtn.addEventListener('click', () => {
+    hideGameOverModal();
+    setGameActive(true);
+    history = [];
+    initGame();
+    renderBoard();
+    saveGameToLocalStorage();
+});
+
+// Обработчик кнопки показа таблицы лидеров из основного окна
+showLeaderboardBtn.addEventListener('click', () => {
+    setGameActive(false);
+    loadLeaders(); // подгрузка актуальных данных
+    renderLeaderboard();
+    leaderboardModal.classList.remove('hidden');
+});
+
+// Обработчик кнопки закрытия таблицы лидеров
+closeLeaderboardBtn.addEventListener('click', () => {
+    leaderboardModal.classList.add('hidden');
+    setGameActive(true);
+    
+    // Активация игрового поля, если игра не была окончена
+    if (isGameOver()) {
+        setGameActive(false);
+    } else {
+        setGameActive(true);
+    }
+});
+
 // Обработчики клавиш, вызывающие движение
 // window.addEventListener('keydown', (e) => {
 //     switch (e.key) {
@@ -381,10 +551,13 @@ function initControls() {
 
 // Обработчик кнопки новой игры
 newGameBtn.addEventListener('click', () => {
+    hideGameOverModal();
+    leaderboardModal.classList.add('hidden');
     history = []; // очистка истории
     initGame();
     renderBoard();
     saveGameToLocalStorage(); // сохранение текущего нового состояния
+    checkGameOverAndShowModal();
 });
 
 // Обработчик кнопки назад
@@ -398,6 +571,7 @@ createGridBackground();
 // Инициализация при загрузке страницы
 window.addEventListener('DOMContentLoaded', () => {
     loadGameFromLocalStorage();
+    loadLeaders();
     initControls(); // инициализация управления
 });
 

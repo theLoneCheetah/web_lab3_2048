@@ -21,14 +21,47 @@
                 <button id="undo">Отмена</button>
             </div>
         </div>
+
         <div class="game-board">
             <!-- Фоновая сетка из ячеек -->
             <div class="grid" id="grid"></div>
             <!-- Контейнер для плиток -->
             <div class="tiles-container" id="tiles-container"></div>
         </div>
-        <!-- Будет лидерборд -->
-        <div class="leaderboard-placeholder" style="display: none;">
+        
+        <!-- Блок окончания игры -->
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <!-- Модальное окно -->
+                <p id="game-over-message">Игра окончена! Введите имя для сохранения рекорда:</p>
+                <input type="text" id="player-name" placeholder="Ваше имя" maxlength="20">
+                <!-- Кнопки сохранения результата и рестарта -->
+                <div class="modal-buttons">
+                    <button id="save-score-btn">Сохранить результат</button>
+                    <button id="restart-from-modal">Начать заново</button>
+                </div>
+                <p id="save-confirmation" class="hidden">Ваш рекорд сохранён!</p>
+            </div>
+        </div>
+
+        <!-- Кнопка для открытия таблицы лидеров -->
+        <div class="leaderboard-toggle">
+            <button id="show-leaderboard">Рекорды</button>
+        </div>
+
+        <!-- Блок таблицы лидеров -->
+        <div id="leaderboard-modal" class="modal hidden">
+            <div class="modal-content">
+                <!-- Модальное окно -->
+                <h2>Таблица рекордов</h2>
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr><th>Имя</th><th>Очки</th><th>Дата</th></tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+                <button id="close-leaderboard">Закрыть</button>
+            </div>
         </div>
     </div>
     <!-- Подключение скрипта -->

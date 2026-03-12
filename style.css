@@ -122,3 +122,65 @@ button:hover {
 /* Цвета для разных значений */
 .tile[data-value="2"] { background: #eee4da; color: #776e65; }
 .tile[data-value="4"] { background: #ede0c8; color: #776e65; }
+
+/* Для всех модальных окон */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal.hidden {
+    display: none;
+}
+.modal-content {
+    background: #faf8ef;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+}
+/* Поле ввода имени */
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #bbada0;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Таблица лидеров */
+#leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+.leaderboard-toggle {
+    margin-top: 20px;
+    text-align: center;
+}
+#leaderboard-table th,
+#leaderboard-table td {
+    border: 1px solid #bbada0;
+    padding: 8px;
+    text-align: center;
+}
+#leaderboard-table th {
+    background: #bbada0;
+    color: white;
+}
+.hidden {
+    display: none !important;
+}
