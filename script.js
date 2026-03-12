@@ -1,9 +1,12 @@
 // Размер сетки
 const SIZE = 4;
+const GAP = 10; // отступ между плитками
 let gridData = [];  // двумерный массив со значениями плиток (0 по умолчанию)
 let score = 0; // текущий счёт
 let history = []; // массив объектов {board, score} для отмены ходов
 const MAX_HISTORY = 10; // максимальное количество отменяемых ходов
+
+let tileElements = new Map(); // ключ row:col указывает на DOM-элемент плитки
 
 // DOM элементы
 const gridElement = document.getElementById('grid');
@@ -89,43 +92,92 @@ function updateScore() {
     scoreSpan.textContent = score;
 }
 
-// Отрисовка плиток на основе gridData
-function renderBoard() {
-    // Очистка
-    while (tilesContainer.firstChild) {
-        tilesContainer.removeChild(tilesContainer.firstChild);
-    }
-
+// Расчёт размера плитки
+function calculateTileSize() {
     // Плитки позиционируются абсолютно в рамках игрового поля
     const boardWidth = tilesContainer.clientWidth;
-    const boardHeight = tilesContainer.clientHeight;
-    const gap = 10; // отступ между плитками
-    const tileSize = (boardWidth - gap * (SIZE - 1)) / SIZE; // сторона плитки
+    return (boardWidth - GAP * (SIZE - 1)) / SIZE;
+}
+
+// Создание нового DOM-элемента плитки
+function createTileElement(value, row, col) {
+    const tile = document.createElement('div');
+    tile.classList.add('tile');
+    tile.setAttribute('data-value', value);
+    tile.textContent = value;
+
+    const tileSize = calculateTileSize();
+
+    // Ширина, высота и смещение
+    tile.style.width = `${tileSize}px`;
+    tile.style.height = `${tileSize}px`;
+    tile.style.left = `${col * (tileSize + GAP)}px`;
+    tile.style.top = `${row * (tileSize + GAP)}px`;
+
+    return tile;
+}
+
+// Синхронизация DOM с состоянием gridData + анимация
+function syncBoard(newGrid) {
+    const tileSize = calculateTileSize();
+
+    // Копирование старых плиток с пометкой "не использована"
+    const oldTiles = new Map();
+    for (let [key, tile] of tileElements.entries()) {
+        oldTiles.set(key, { tile, used: false });
+    }
+
+    const newTileElements = new Map();
 
     for (let row = 0; row < SIZE; row++) {
         for (let col = 0; col < SIZE; col++) {
-            const value = gridData[row][col];
-            if (value !== 0) {
-                // Если плитка непустая, создаём элемент
-                const tile = document.createElement('div');
-                tile.classList.add('tile');
-                tile.setAttribute('data-value', value);
-                tile.textContent = value;
+            const value = newGrid[row][col];
+            if (value === 0) continue;
 
-                // Вычисляем позицию
-                const left = col * (tileSize + gap);
-                const top = row * (tileSize + gap);
+            const key = `${row}:${col}`;
 
-                // Ширина, высота и смещение
-                tile.style.width = `${tileSize}px`;
-                tile.style.height = `${tileSize}px`;
-                tile.style.left = `${left}px`;
-                tile.style.top = `${top}px`;
+            // Ищем среди старых плиток неиспользованную с таким же значением
+            let foundTile = null;
+            let foundKey = null;
+            for (let [oldKey, { tile, used }] of oldTiles.entries()) {
+                if (!used && parseInt(tile.getAttribute('data-value')) === value) {
+                    foundTile = tile;
+                    foundKey = oldKey;
+                    break;
+                }
+            }
 
+            if (foundTile) {
+                // Перемещение существующей плитки
+                foundTile.style.width = `${tileSize}px`;
+                foundTile.style.height = `${tileSize}px`;
+                foundTile.style.left = `${col * (tileSize + GAP)}px`;
+                foundTile.style.top = `${row * (tileSize + GAP)}px`;
+
+                // Удаление из oldTiles (использована)
+                oldTiles.delete(foundKey);
+                // Добавление в новый объект
+                newTileElements.set(key, foundTile);
+            } else {
+                // Создание новой плитки
+                const tile = createTileElement(value, row, col);
+                tile.classList.add('tile-new'); // анимация появления
                 tilesContainer.appendChild(tile);
+                newTileElements.set(key, tile);
             }
         }
     }
+
+    // Удаление оставшихся старых плиток
+    for (let [oldKey, { tile }] of oldTiles.entries()) {
+        tile.classList.add('tile-remove');
+        tile.addEventListener('animationend', () => {
+            if (tile.parentNode) tile.remove();
+        }, { once: true });
+    }
+
+    // Обновляем глобальный Map
+    tileElements = newTileElements;
 }
 
 // Обработка линии из 4 чисел с многоступенчатым слиянием
@@ -211,7 +263,7 @@ function undo() {
 
     // Обновление и сохранение в localStorage
     updateScore();
-    renderBoard();
+    syncBoard(gridData);
     saveGameToLocalStorage();
     checkGameOverAndShowModal(); // проверка окончания игры
 }
@@ -245,7 +297,7 @@ function loadGameFromLocalStorage() {
     }
 
     // Обновление и проверка окончания игры
-    renderBoard();
+    syncBoard(gridData);
     checkGameOverAndShowModal();
 }
 
@@ -304,7 +356,7 @@ function move(direction) {
         }
         
         // Обновление и сохранение
-        renderBoard();
+        syncBoard(gridData);
         saveGameToLocalStorage();
         checkGameOverAndShowModal(); // проверка окончания игры
     } else {
@@ -530,7 +582,7 @@ restartFromModalBtn.addEventListener('click', () => {
     setGameActive(true);
     history = [];
     initGame();
-    renderBoard();
+    syncBoard(gridData);
     saveGameToLocalStorage();
 });
 
@@ -561,7 +613,7 @@ newGameBtn.addEventListener('click', () => {
     leaderboardModal.classList.add('hidden');
     history = []; // очистка истории
     initGame();
-    renderBoard();
+    syncBoard(gridData);
     saveGameToLocalStorage(); // сохранение текущего нового состояния
     checkGameOverAndShowModal();
 });
@@ -583,5 +635,5 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Обновление отрисовки при изменении размеров окна
 window.addEventListener('resize', () => {
-    renderBoard();
+    syncBoard(gridData);
 });

@@ -115,8 +115,8 @@ button:hover {
     font-size: 2rem;
     font-weight: bold;
     color: #776e65;
-    transition: all 0.1s ease;
-    /* Значения для позиционирования будут задаваться через JS как top/left */
+    transition: all 0.1s ease-in-out;
+    will-change: left, top, width, height, transform, opacity;
 }
 
 /* Цвета для разных значений */
@@ -131,6 +131,25 @@ button:hover {
 .tile[data-value="512"] { background: #edc850; color: #f9f6f2; }
 .tile[data-value="1024"] { background: #edc53f; color: #f9f6f2; }
 .tile[data-value="2048"] { background: #edc22e; color: #f9f6f2; }
+
+/* Анимация */
+.tile-new {
+    animation: appear 0.2s ease-in-out;
+}
+
+.tile-remove {
+    animation: remove 0.15s ease-in-out forwards;
+}
+
+@keyframes appear {
+    0% { opacity: 0; transform: scale(0); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes remove {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0); }
+}
 
 /* Для всех модальных окон */
 .modal {
