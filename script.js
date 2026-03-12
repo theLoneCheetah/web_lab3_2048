@@ -653,3 +653,17 @@ window.addEventListener('resize', () => {
         tilesContainer.classList.remove('no-transition');
     }, 150);
 });
+
+// Дополнение: небольшой тест-массив для быстрого достижения игры
+/*
+const myTestBoard = [
+    [2, 2, 4, 4],
+    [8, 8, 16, 16],
+    [32, 32, 64, 64],
+    [1024, 1024, 0, 0]
+];
+const gameState = JSON.parse(localStorage.getItem('game2048')) || {};
+gameState.board = myTestBoard;
+localStorage.setItem('game2048', JSON.stringify(gameState));
+location.reload();
+*/
