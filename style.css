@@ -122,6 +122,15 @@ button:hover {
 /* Цвета для разных значений */
 .tile[data-value="2"] { background: #eee4da; color: #776e65; }
 .tile[data-value="4"] { background: #ede0c8; color: #776e65; }
+.tile[data-value="8"] { background: #f2b179; color: #f9f6f2; }
+.tile[data-value="16"] { background: #f59563; color: #f9f6f2; }
+.tile[data-value="32"] { background: #f67c5f; color: #f9f6f2; }
+.tile[data-value="64"] { background: #f65e3b; color: #f9f6f2; }
+.tile[data-value="128"] { background: #edcf72; color: #f9f6f2; }
+.tile[data-value="256"] { background: #edcc61; color: #f9f6f2; }
+.tile[data-value="512"] { background: #edc850; color: #f9f6f2; }
+.tile[data-value="1024"] { background: #edc53f; color: #f9f6f2; }
+.tile[data-value="2048"] { background: #edc22e; color: #f9f6f2; }
 
 /* Для всех модальных окон */
 .modal {
@@ -183,4 +192,49 @@ button:hover {
 }
 .hidden {
     display: none !important;
+}
+
+/* Адаптивность для телефонов */
+@media (max-width: 600px) {
+    .game-container {
+        padding: 10px;
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    .score-container {
+        padding: 5px 10px;
+        font-size: 1rem;
+    }
+    .controls button {
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+    .tile {
+        font-size: 1.5rem; /* базовый размер плиток */
+    }
+    /* Уменьшаем шрифт для больших чисел */
+    .tile[data-value="128"],
+    .tile[data-value="256"],
+    .tile[data-value="512"] {
+        font-size: 1.2rem;
+    }
+    .tile[data-value="1024"],
+    .tile[data-value="2048"] {
+        font-size: 1rem;
+    }
+    .tile[data-value="4096"],
+    .tile[data-value="8192"],
+    .tile[data-value="16384"] {
+        font-size: 0.9rem;
+    }
+    /* Адаптация модальных окон */
+    .modal-content {
+        padding: 15px;
+    }
+    #leaderboard-table th,
+    #leaderboard-table td {
+        padding: 4px;
+        font-size: 0.9rem;
+    }
 }

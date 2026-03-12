@@ -18,7 +18,6 @@ const gameOverMessage = document.getElementById('game-over-message');
 const playerNameInput = document.getElementById('player-name');
 const saveScoreBtn = document.getElementById('save-score-btn');
 const restartFromModalBtn = document.getElementById('restart-from-modal');
-const saveConfirmation = document.getElementById('save-confirmation');
 const showLeaderboardBtn = document.getElementById('show-leaderboard');
 const leaderboardModal = document.getElementById('leaderboard-modal');
 const leaderboardBody = document.getElementById('leaderboard-body');
@@ -435,7 +434,17 @@ function renderLeaderboard() {
     });
 }
 
-// Проверка окончания игры
+// Проверка наличия плитки 2048 или больше (победа)
+function hasWon() {
+    for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+            if (gridData[row][col] >= 2048) return true;
+        }
+    }
+    return false;
+}
+
+// Проверка окончания игры при невозможности хода
 function isGameOver() {
     // Есть пустые клетки?
     for (let row = 0; row < SIZE; row++) {
@@ -462,14 +471,19 @@ function isGameOver() {
 }
 
 // Модальное окно окончания игры
-function showGameOverModal() {
+function showGameOverModal(isWin) {
     gameOverModal.classList.remove('hidden');
     playerNameInput.value = '';
     playerNameInput.classList.remove('hidden');
     saveScoreBtn.classList.remove('hidden');
     restartFromModalBtn.classList.remove('hidden');
-    saveConfirmation.classList.add('hidden');
-    gameOverMessage.textContent = 'Игра окончена! Введите имя для сохранения рекорда:';
+
+    // Обычное либо выигрышное сообщение
+    if (isWin) {
+        gameOverMessage.textContent = 'Победа! Вы достигли 2048! Введите имя для сохранения рекорда:';
+    } else {
+        gameOverMessage.textContent = 'Игра окончена! Введите имя для сохранения рекорда:';
+    }
 }
 
 // Скрытие окна окончания игры
@@ -479,9 +493,13 @@ function hideGameOverModal() {
 
 // Проверка окончания игры, показ/скрытие модального окна
 function checkGameOverAndShowModal() {
-    if (isGameOver()) {
+    const won = hasWon();
+    const over = isGameOver();
+    
+    // Если победа или поражение, окончить игру
+    if (won || over) {
         setGameActive(false);
-        showGameOverModal();
+        showGameOverModal(won); // передаём флаг о победе
     } else {
         setGameActive(true);
         hideGameOverModal();
@@ -504,7 +522,6 @@ saveScoreBtn.addEventListener('click', () => {
     gameOverMessage.textContent = 'Ваш рекорд сохранён!';
     playerNameInput.classList.add('hidden');
     saveScoreBtn.classList.add('hidden');
-    saveConfirmation.classList.remove('hidden');
 });
 
 // Обработчик кнопки начала новой игры из модального окна
@@ -531,23 +548,12 @@ closeLeaderboardBtn.addEventListener('click', () => {
     setGameActive(true);
     
     // Активация игрового поля, если игра не была окончена
-    if (isGameOver()) {
+    if (hasWon() || isGameOver()) {
         setGameActive(false);
     } else {
         setGameActive(true);
     }
 });
-
-// Обработчики клавиш, вызывающие движение
-// window.addEventListener('keydown', (e) => {
-//     switch (e.key) {
-//         case 'ArrowLeft': e.preventDefault(); move('left'); break;
-//         case 'ArrowRight': e.preventDefault(); move('right'); break;
-//         case 'ArrowUp': e.preventDefault(); move('up'); break;
-//         case 'ArrowDown': e.preventDefault(); move('down'); break;
-//         default: break;
-//     }
-// });
 
 // Обработчик кнопки новой игры
 newGameBtn.addEventListener('click', () => {
