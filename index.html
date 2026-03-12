@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 играть онлайн</title>
+    <!-- Стили отдельно в .css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>2048</h1>
+            <!-- Счёт -->
+            <div class="score-container">
+                Счёт: <span id="score">0</span>
+            </div>
+            <!-- Кнопки новой игры и отмены -->
+            <div class="controls">
+                <button id="new-game">Новая игра</button>
+                <button id="undo">Отмена</button>
+            </div>
+        </div>
+        <div class="game-board">
+            <!-- Фоновая сетка из ячеек -->
+            <div class="grid" id="grid"></div>
+            <!-- Контейнер для плиток -->
+            <div class="tiles-container" id="tiles-container"></div>
+        </div>
+        <!-- Будет лидерборд -->
+        <div class="leaderboard-placeholder" style="display: none;">
+        </div>
+    </div>
+    <!-- Подключение скрипта -->
+    <script src="script.js"></script>
+</body>
+</html>
